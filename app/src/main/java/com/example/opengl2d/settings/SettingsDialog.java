@@ -1,4 +1,4 @@
-package com.example.lab_5.settings;
+package com.example.opengl2d.settings;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -14,8 +14,8 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 
-import com.example.lab_5.engine.IGameManager;
-import com.example.lab_5.R;
+import com.example.opengl2d.engine.IGameManager;
+import com.example.opengl2d.R;
 
 
 /**
@@ -25,9 +25,7 @@ public class SettingsDialog extends DialogFragment {
 
     private CheckBox spawnBox;
     private EditText launchSpeed, accelerationX, accelerationY, bounceFriction, drag;
-
     private EditText pointsSize, boxSize;
-
     private IGameManager gameManager;
 
     @NonNull
@@ -37,35 +35,33 @@ public class SettingsDialog extends DialogFragment {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         LayoutInflater inflater = getActivity().getLayoutInflater();
 
-        builder.setView(inflater.inflate(R.layout.fragment_settings_dialog,null))
-            .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    //save settings...
-                    EnvironmentSettings.SPAWN_BOX = spawnBox.isChecked();
-                    EnvironmentSettings.MAX_LAUNCH_SPEED = Integer.parseInt(launchSpeed.getText().toString());
-                    EnvironmentSettings.ACCELERATION.x = Float.parseFloat(accelerationX.getText().toString());
-                    EnvironmentSettings.ACCELERATION.y = Float.parseFloat(accelerationY.getText().toString());
-                    EnvironmentSettings.BOUNCE_FRICTION = Float.parseFloat(bounceFriction.getText().toString());
-                    EnvironmentSettings.DRAG = Float.parseFloat(drag.getText().toString());
-
-                    VisualSettings.POINT_SIZE = Integer.parseInt(pointsSize.getText().toString());
-                    VisualSettings.BOX_SIZE = Integer.parseInt(boxSize.getText().toString());
-                }
-            })
-            .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    getDialog().cancel();
-                }
-            })
-        .setNeutralButton("Clear view", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                System.out.println("clear view!");
-                gameManager.onClearView();
-            }
-        });
+        builder.setView(inflater.inflate(R.layout.fragment_settings_dialog, null))
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //save settings...
+                        EnvironmentSettings.SPAWN_BOX = spawnBox.isChecked();
+                        EnvironmentSettings.MAX_LAUNCH_SPEED = Integer.parseInt(launchSpeed.getText().toString());
+                        EnvironmentSettings.ACCELERATION.x = Float.parseFloat(accelerationX.getText().toString());
+                        EnvironmentSettings.ACCELERATION.y = Float.parseFloat(accelerationY.getText().toString());
+                        EnvironmentSettings.BOUNCE_FRICTION = Float.parseFloat(bounceFriction.getText().toString());
+                        EnvironmentSettings.DRAG = Float.parseFloat(drag.getText().toString());
+                        VisualSettings.POINT_SIZE = Integer.parseInt(pointsSize.getText().toString());
+                        VisualSettings.BOX_SIZE = Integer.parseInt(boxSize.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getDialog().cancel();
+                    }
+                })
+                .setNeutralButton("Clear view", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        gameManager.onClearView();
+                    }
+                });
 
         return builder.create();
     }
@@ -73,7 +69,6 @@ public class SettingsDialog extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-
         gameManager = ((IGameManager) context);
     }
 

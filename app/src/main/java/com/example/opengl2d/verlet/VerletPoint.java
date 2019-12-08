@@ -1,37 +1,38 @@
-package com.example.lab_5.verlet;
+package com.example.opengl2d.verlet;
 
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import com.example.lab_5.engine.GameRenderer;
-import com.example.lab_5.engine.GameView;
-import com.example.lab_5.engine.IGameObject;
-import com.example.lab_5.utils.Time;
-import com.example.lab_5.settings.EnvironmentSettings;
-import com.example.lab_5.settings.VisualSettings;
+import com.example.opengl2d.engine.GameRenderer;
+import com.example.opengl2d.engine.GameView;
+import com.example.opengl2d.engine.IGameObject;
+import com.example.opengl2d.utils.Time;
+import com.example.opengl2d.settings.EnvironmentSettings;
+import com.example.opengl2d.settings.VisualSettings;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
 
+/**
+ * The type Verlet point.
+ */
 public class VerletPoint implements IGameObject {
     private PointF position;
     private PointF oldPosition;
     private Paint paint;
     private PointF rotationCenter;
-    //
-
 
     private final String vertexShaderCode =
             "uniform mat4 uMVPMatrix;" +
                     "attribute vec4 vPosition;" +
-                    "uniform lowp float pSize;"+
+                    "uniform lowp float pSize;" +
                     "void main() {" +
                     "  gl_Position = uMVPMatrix*vPosition;" +
-                    "gl_PointSize = pSize;"+
+                    "gl_PointSize = pSize;" +
                     "}";
 
     private final String fragmentShaderCode =
@@ -52,13 +53,21 @@ public class VerletPoint implements IGameObject {
 
     private float[] modelMatrix = new float[16];
     private float[] mVPMatrix = new float[16];
-    float color[] = { 0.63671875f, 0.76953125f, 0.22265625f, 1.0f };
-
+    /**
+     * The Color.
+     */
+    float color[] = {0.63671875f, 0.76953125f, 0.22265625f, 1.0f};
 
 
     // number of coordinates per vertex in this array
 
 
+    /**
+     * Instantiates a new Verlet point.
+     *
+     * @param x the x
+     * @param y the y
+     */
     public VerletPoint(int x, int y) {
         position = new PointF();
         position.x = x;
@@ -72,11 +81,26 @@ public class VerletPoint implements IGameObject {
         initOpenGL();
     }
 
+    /**
+     * Instantiates a new Verlet point.
+     *
+     * @param x              the x
+     * @param y              the y
+     * @param rotationCenter the rotation center
+     */
     public VerletPoint(int x, int y, PointF rotationCenter) {
         this(x, y);
         this.rotationCenter = rotationCenter;
     }
 
+    /**
+     * Instantiates a new Verlet point.
+     *
+     * @param x    the x
+     * @param y    the y
+     * @param xOld the x old
+     * @param yOld the y old
+     */
     public VerletPoint(int x, int y, int xOld, int yOld) {
         this(x, y);
 
@@ -89,17 +113,25 @@ public class VerletPoint implements IGameObject {
         oldPosition.y = yOld;
     }
 
-    public VerletPoint(int x, int y, int xOld, int yOld, PointF rotationCenter)
-    {
-        this(x,y,xOld,yOld);
+    /**
+     * Instantiates a new Verlet point.
+     *
+     * @param x              the x
+     * @param y              the y
+     * @param xOld           the x old
+     * @param yOld           the y old
+     * @param rotationCenter the rotation center
+     */
+    public VerletPoint(int x, int y, int xOld, int yOld, PointF rotationCenter) {
+        this(x, y, xOld, yOld);
         this.rotationCenter = rotationCenter;
     }
 
     @Override
     public void draw(float[] vPMatrix) {
 
-        Matrix.translateM(modelMatrix,0,position.x-oldPosition.x,position.y-oldPosition.y,0);
-        Matrix.multiplyMM(mVPMatrix,0,vPMatrix,0,modelMatrix,0);
+        Matrix.translateM(modelMatrix, 0, position.x - oldPosition.x, position.y - oldPosition.y, 0);
+        Matrix.multiplyMM(mVPMatrix, 0, vPMatrix, 0, modelMatrix, 0);
 
         GLES20.glUseProgram(mProgram);
 
@@ -112,10 +144,10 @@ public class VerletPoint implements IGameObject {
         // Prepare the triangle coordinate data
         GLES20.glVertexAttribPointer(positionHandle, 3,
                 GLES20.GL_FLOAT, false,
-                3*4, vertexBuffer);
+                3 * 4, vertexBuffer);
 
-        pointSizeHandle = GLES20.glGetUniformLocation(mProgram,"pSize");
-        GLES20.glUniform1f(pointSizeHandle,VisualSettings.POINT_SIZE);
+        pointSizeHandle = GLES20.glGetUniformLocation(mProgram, "pSize");
+        GLES20.glUniform1f(pointSizeHandle, VisualSettings.POINT_SIZE);
 
         // get handle to fragment shader's vColor member
         colorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
@@ -137,12 +169,9 @@ public class VerletPoint implements IGameObject {
     }
 
     @Override
-    public void update()
-    {
-        float vx = (position.x - oldPosition.x ) * EnvironmentSettings.DRAG;
+    public void update() {
+        float vx = (position.x - oldPosition.x) * EnvironmentSettings.DRAG;
         float vy = (position.y - oldPosition.y) * EnvironmentSettings.DRAG;
-
-        //2*pos - oldPos + adt^2 = pos + pos - olpod + adt^2
 
         oldPosition.x = position.x;
         oldPosition.y = position.y;
@@ -156,6 +185,9 @@ public class VerletPoint implements IGameObject {
         return position;
     }
 
+    /**
+     * Constrain to screen.
+     */
     public void ConstrainToScreen() {
         float vx = (position.x - oldPosition.x) * EnvironmentSettings.DRAG;
         float vy = (position.y - oldPosition.y) * EnvironmentSettings.DRAG;
@@ -166,16 +198,16 @@ public class VerletPoint implements IGameObject {
         if (position.x >= GameView.right - halfSize) {
             position.x = GameView.right - halfSize;
             oldPosition.x = position.x + vx * bounceFriction;
-        } else if (position.x <= GameView.left+halfSize) {
-            position.x = GameView.left+halfSize;
+        } else if (position.x <= GameView.left + halfSize) {
+            position.x = GameView.left + halfSize;
             oldPosition.x = position.x + vx * bounceFriction;
         }
 
         if (position.y >= GameView.top - halfSize) {
             position.y = GameView.top - halfSize;
             oldPosition.y = position.y + vy * bounceFriction;
-        } else if (position.y <= GameView.bottom+halfSize) {
-            position.y = GameView.bottom+halfSize;
+        } else if (position.y <= GameView.bottom + halfSize) {
+            position.y = GameView.bottom + halfSize;
             oldPosition.y = position.y + vy * bounceFriction;
         }
     }
@@ -191,7 +223,7 @@ public class VerletPoint implements IGameObject {
         // create a floating point buffer from the ByteBuffer
         vertexBuffer = bb.asFloatBuffer();
         // add the coordinates to the FloatBuffer
-        vertexBuffer.put(new float[]{position.x,position.y,0});
+        vertexBuffer.put(new float[]{position.x, position.y, 0});
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
@@ -212,7 +244,7 @@ public class VerletPoint implements IGameObject {
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(mProgram);
 
-        Matrix.setIdentityM(modelMatrix,0);
+        Matrix.setIdentityM(modelMatrix, 0);
     }
 
 }

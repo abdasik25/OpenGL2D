@@ -1,19 +1,21 @@
-package com.example.lab_5.verlet;
+package com.example.opengl2d.verlet;
 
 import android.graphics.PointF;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 
-import com.example.lab_5.engine.GameRenderer;
-import com.example.lab_5.engine.IGameObject;
-import com.example.lab_5.settings.VisualSettings;
+import com.example.opengl2d.engine.GameRenderer;
+import com.example.opengl2d.engine.IGameObject;
+import com.example.opengl2d.settings.VisualSettings;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 
-public class VerletSquare implements IGameObject
-{
+/**
+ * The type Verlet square.
+ */
+public class VerletSquare implements IGameObject {
     private PointF position;
 
     private VerletStick[] sticks;
@@ -45,60 +47,77 @@ public class VerletSquare implements IGameObject
 
     private float[] modelMatrix = new float[16];
     private float[] mVPMatrix = new float[16];
-    float color[] = { 1.0f, 0.76953125f, 0.22265625f, 1.0f };
+    /**
+     * The Color.
+     */
+    float color[] = {1.0f, 0.76953125f, 0.22265625f, 1.0f};
 
+    /**
+     * The Coords per vertex.
+     */
     static final int COORDS_PER_VERTEX = 3;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
     private float[] squareCoords;
 
-    public VerletSquare(int x, int y)
-    {
-        position = new PointF(x,y);
+    /**
+     * Instantiates a new Verlet square.
+     *
+     * @param x the x
+     * @param y the y
+     */
+    public VerletSquare(int x, int y) {
+        position = new PointF(x, y);
 
         points = new VerletPoint[4];
         sticks = new VerletStick[5];
 
         size = VisualSettings.BOX_SIZE;
 
-        points[0] = new VerletPoint(x-size/2,y-size/2, position);
-        points[1] = new VerletPoint(x-size/2,y+size/2, position);
-        points[2] = new VerletPoint(x+size/2,y-size/2, position);
-        points[3] = new VerletPoint(x+size/2,y+size/2, position);
+        points[0] = new VerletPoint(x - size / 2, y - size / 2, position);
+        points[1] = new VerletPoint(x - size / 2, y + size / 2, position);
+        points[2] = new VerletPoint(x + size / 2, y - size / 2, position);
+        points[3] = new VerletPoint(x + size / 2, y + size / 2, position);
 
         CreateSticks();
     }
 
-    public VerletSquare(int x, int y, int xOld, int yOld)
-    {
-        position = new PointF(x,y);
+    /**
+     * Instantiates a new Verlet square.
+     *
+     * @param x    the x
+     * @param y    the y
+     * @param xOld the x old
+     * @param yOld the y old
+     */
+    public VerletSquare(int x, int y, int xOld, int yOld) {
+        position = new PointF(x, y);
 
         points = new VerletPoint[4];
         sticks = new VerletStick[5];
 
         size = VisualSettings.BOX_SIZE;
 
-        points[0] = new VerletPoint(x-size/2,y-size/2,xOld-size/2,yOld-size/2, position);
-        points[1] = new VerletPoint(x-size/2,y+size/2,xOld-size/2,yOld+size/2, position);
-        points[2] = new VerletPoint(x+size/2,y-size/2,xOld+size/2,yOld-size/2, position);
-        points[3] = new VerletPoint(x+size/2,y+size/2,xOld+size/2,yOld+size/2, position);
+        points[0] = new VerletPoint(x - size / 2, y - size / 2, xOld - size / 2, yOld - size / 2, position);
+        points[1] = new VerletPoint(x - size / 2, y + size / 2, xOld - size / 2, yOld + size / 2, position);
+        points[2] = new VerletPoint(x + size / 2, y - size / 2, xOld + size / 2, yOld - size / 2, position);
+        points[3] = new VerletPoint(x + size / 2, y + size / 2, xOld + size / 2, yOld + size / 2, position);
 
         CreateSticks();
     }
 
-    private void CreateSticks()
-    {
-        sticks[0] = new VerletStick(points[0],points[1]);
-        sticks[1] = new VerletStick(points[1],points[3]);
-        sticks[2] = new VerletStick(points[3],points[2]);
-        sticks[3] = new VerletStick(points[2],points[0]);
-        sticks[4] = new VerletStick(points[0],points[3]);
+    private void CreateSticks() {
+        sticks[0] = new VerletStick(points[0], points[1]);
+        sticks[1] = new VerletStick(points[1], points[3]);
+        sticks[2] = new VerletStick(points[3], points[2]);
+        sticks[3] = new VerletStick(points[2], points[0]);
+        sticks[4] = new VerletStick(points[0], points[3]);
 
         squareCoords = new float[]
                 {
-                        points[0].getPosition().x,points[0].getPosition().y,0,
-                        points[2].getPosition().x,points[2].getPosition().y,0,
-                        points[3].getPosition().x,points[3].getPosition().y,0,
-                        points[1].getPosition().x,points[1].getPosition().y,0
+                        points[0].getPosition().x, points[0].getPosition().y, 0,
+                        points[2].getPosition().x, points[2].getPosition().y, 0,
+                        points[3].getPosition().x, points[3].getPosition().y, 0,
+                        points[1].getPosition().x, points[1].getPosition().y, 0
                 };
 
         initOpenGL();
@@ -113,7 +132,7 @@ public class VerletSquare implements IGameObject
     @Override
     public void draw(float[] vPMatrix) {
 
-        Matrix.multiplyMM(mVPMatrix,0,vPMatrix,0,modelMatrix,0);
+        Matrix.multiplyMM(mVPMatrix, 0, vPMatrix, 0, modelMatrix, 0);
 
         GLES20.glUseProgram(mProgram);
 
@@ -146,11 +165,11 @@ public class VerletSquare implements IGameObject
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle);
 
-        for (VerletPoint point:points) {
+        for (VerletPoint point : points) {
             point.draw(vPMatrix);
         }
 
-        for (VerletStick stick: sticks) {
+        for (VerletStick stick : sticks) {
             stick.draw(vPMatrix);
         }
     }
@@ -158,27 +177,27 @@ public class VerletSquare implements IGameObject
     @Override
     public void update() {
 
-        for (VerletPoint point:points) {
+        for (VerletPoint point : points) {
             point.update();
         }
 
-        for(int i = 0;i<3;i++) {
+        for (int i = 0; i < 3; i++) {
             for (VerletStick stick : sticks) {
                 stick.update();
             }
 
-            for (VerletPoint point:points) {
+            for (VerletPoint point : points) {
                 point.ConstrainToScreen();
             }
         }
 
-        float dx = points[0].getPosition().x + (points[3].getPosition().x - points[0].getPosition().x)/2 - position.x;
-        float dy = points[0].getPosition().y + (points[3].getPosition().y - points[0].getPosition().y)/2 - position.y;
+        float dx = points[0].getPosition().x + (points[3].getPosition().x - points[0].getPosition().x) / 2 - position.x;
+        float dy = points[0].getPosition().y + (points[3].getPosition().y - points[0].getPosition().y) / 2 - position.y;
 
-        position.x = points[0].getPosition().x + (points[3].getPosition().x - points[0].getPosition().x)/2;
-        position.y = points[0].getPosition().y + (points[3].getPosition().y - points[0].getPosition().y)/2;
+        position.x = points[0].getPosition().x + (points[3].getPosition().x - points[0].getPosition().x) / 2;
+        position.y = points[0].getPosition().y + (points[3].getPosition().y - points[0].getPosition().y) / 2;
 
-        Matrix.translateM(modelMatrix,0,dx,dy,0);
+        Matrix.translateM(modelMatrix, 0, dx, dy, 0);
     }
 
     private void initOpenGL() {
@@ -208,6 +227,6 @@ public class VerletSquare implements IGameObject
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(mProgram);
 
-        Matrix.setIdentityM(modelMatrix,0);
+        Matrix.setIdentityM(modelMatrix, 0);
     }
 }
